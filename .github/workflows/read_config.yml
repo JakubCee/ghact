@@ -1,0 +1,35 @@
+name: Inline config
+on: [push]
+
+
+jobs:
+  read-config:
+    runs-on: ubuntu-latest
+    outputs:
+      cicd-config-json: ${{ steps.read-config.outputs.CICD_CONFIG_JSON }}
+
+
+    steps:
+    - name: Checkout
+      id: checkout
+      uses: actions/checkout@v4
+
+    - id: read-config
+      run: |
+        config=$(cat cicd_config.json)
+        echo "CICD_CONFIG_JSON=$(echo $config | jq -c .)" >> $GITHUB_OUTPUT
+
+  parser-printer:
+    runs-on: ubuntu-latest
+    needs: ["read-config"]
+    steps:
+      - run: |
+          echo "Hello from: {{ fromJSON(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}"
+
+
+#   - run: |
+#     echo 'PACKAGE_JSON<<EOF' >> $GITHUB_ENV
+#     cat ./package.json >> $GITHUB_ENV
+#     echo 'EOF' >> $GITHUB_ENV
+# - run: |
+    echo '${{ fromJson(env.PACKAGE_JSON).version }}'
