@@ -10,6 +10,9 @@ jobs:
       id: checkout
       uses: actions/checkout@v4
 
+    - name: List files
+      run: ls -al
+
     - id: read-config
       run: |
         config=$(cat cicd_config.json)
