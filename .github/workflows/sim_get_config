@@ -1,0 +1,26 @@
+name: Print Workflow Outputs
+
+on: [push]
+
+
+jobs:
+  call-read-config:
+    runs-on: ubuntu-latest
+    
+    steps:
+
+      - id: checkout
+        uses: actions/checkout@v4
+        
+      - name: Call Read CICD Config workflow
+        uses: ./.github/workflows/get_config.yml
+        id: read-config
+        with:
+          config-path: './cicd_config.json'
+
+      - name: Print Outputs
+        run: |
+          echo "Project Key DEV: ${{ steps.read-config.outputs.project-key-dev }}"
+          echo "Project Key TEST: ${{ steps.read-config.outputs.project-key-test }}"
+          echo "Project Key PROD: ${{ steps.read-config.outputs.project-key-prod }}"
+          echo "Test Scenarios: ${{ steps.read-config.outputs.test-scenarios }}"
