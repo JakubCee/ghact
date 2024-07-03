@@ -26,7 +26,7 @@ jobs:
     needs: ["read-config"]
     steps:
       - run: |
-          echo 'Hello from: {{ fromJSON(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}'
+          echo 'Hello from: {{ fromJson(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}'
 
 
 
