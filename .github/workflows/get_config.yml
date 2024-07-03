@@ -1,0 +1,39 @@
+
+name: Read CICD Config file
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        type: string
+        description: 'The path to the configuration file cicd_config.json'
+        required: false
+        default: './cicd_config.json'
+    outputs:
+      project-key-dev:  ${{ jobs.read-config.outputs.project_key_dev }}
+      project-key-test: ${{ jobs.read-config.outputs.project_key_test }}
+      project-key-prod: ${{ jobs.read-config.outputs.project_key_prod }}
+      test-scenarios:   ${{ jobs.read-config.outputs.test_scenarios }}
+
+jobs:
+  read-config:
+    runs-on: ubuntu-latest
+    outputs:
+      project-key-dev:  ${{ steps.read-config.outputs.PROJECT_KEY_DEV }}
+      project-key-test: ${{ steps.read-config.outputs.PROJECT_KEY_TEST }}
+      project-key-prod: ${{ steps.read-config.outputs.PROJECT_KEY_PROD }}
+      test-scenarios:   ${{ steps.read-config.outputs.TEST_SCENARIOS }}
+
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v2
+
+      - id: read-config
+        run: |
+          config=$(cat ${{ inputs.config-path }})
+          echo "PROJECT_KEY_DEV=$(echo $config  | jq -r '.PROJECT_KEY_DEV')"             >> $GITHUB_OUTPUT
+          echo "PROJECT_KEY_TEST=$(echo $config | jq -r '.PROJECT_KEY_TEST')"            >> $GITHUB_OUTPUT
+          echo "PROJECT_KEY_PROD=$(echo $config | jq -r '.PROJECT_KEY_PROD')"            >> $GITHUB_OUTPUT
+          echo "TEST_SCENARIOS=$(echo $config   | jq -r '.TEST_SCENARIOS | join(", ")')" >> $GITHUB_OUTPUT
