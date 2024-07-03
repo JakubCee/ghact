@@ -26,7 +26,15 @@ jobs:
     needs: ["read-config"]
     steps:
       - run: |
-          echo 'Hello from: {{ fromJson(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}'
+          echo 'Hello from: ${{ fromJson(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}'
+
+  parse-no-jq:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@4
+      - id: parse-directly
+        run: |
+          echo 'Hello from unparsed ${{ fromJson( $(cat cicd_config.json) ) }} '
 
 
 
