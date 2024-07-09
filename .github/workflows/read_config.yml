@@ -1,40 +1,44 @@
-name: Inline config
-on: [push]
+name: Parse Config and Set Env Vars
 
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        description: 'Path to the config.json file'
+        type: string
+        required: true
+        default: 'cicd_config.json'
 
 jobs:
-  read-config:
+  parse-config:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout
-      id: checkout
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: List files
-      run: ls -alr
-
-    - id: read-config
-      run: |
-        config=$(cat cicd_config.json)
-        echo "CICD_CONFIG_JSON=$(echo $config | jq -c .)" >> $GITHUB_OUTPUT
-        
-    outputs:
-      cicd-config-json: ${{ steps.read-config.outputs.CICD_CONFIG_JSON }}
-
-  parser-printer:
-    runs-on: ubuntu-latest
-    needs: ["read-config"]
-    steps:
-      - run: |
-          echo 'Hello from: ${{ fromJson(needs.read-config.outputs.cicd-config-json).PROJECT_KEY_DEV }}'
-
-  parse-no-jq:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@4
-      - id: parse-directly
+      - name: Read and parse config.json
+        id: parse_config
         run: |
-          echo 'Hello from unparsed ${{ fromJson( $(cat cicd_config.json) ) }} '
+          CONFIG_PATH="${{ inputs.config-path }}"
+          if [ ! -f "$CONFIG_PATH" ]; then
+            echo "Config file not found: $CONFIG_PATH"
+            exit 1
+          fi
+          CONFIG=$(cat "$CONFIG_PATH")
+          echo "::set-output name=config::$CONFIG"
 
+      - name: Set environment variables
+        id: set_env
+        run: |
+          echo "Parsing ${{ inputs.config-path }} and setting environment variables..."
+          for key in $(echo ${{ steps.parse_config.outputs.config }} | jq -r 'keys[]'); do
+            value=$(echo ${{ steps.parse_config.outputs.config }} | jq -r --arg k "$key" '.[$k]')
+            echo "Setting $key=$value"
+            echo "$key=$value" >> $GITHUB_ENV
+          done
+        env:
+          CONFIG_JSON: ${{ steps.parse_config.outputs.config }}
 
-
+      - name: Export config
+        run: echo "config=${{ steps.parse_config.outputs.config }}" >> $GITHUB_ENV
