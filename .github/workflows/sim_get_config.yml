@@ -19,6 +19,6 @@ jobs:
 
       - name: Print environment variables (for debugging)
         run: |
-          echo "API_KEY: $API_KEY"
-          echo "DATABASE_URL: $DATABASE_URL"
-          echo "DEBUG_MODE: $DEBUG_MODE"
+          echo "PROJECT_KEY_DEV: $PROJECT_KEY_DEV"
+          echo "PROJECT_KEY_TEST: $PROJECT_KEY_TEST"
+          echo "TEST_SCENARIOS: $TEST_SCENARIOS"
