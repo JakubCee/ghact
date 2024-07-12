@@ -1,0 +1,13 @@
+name: Export and publish bundle
+on: [push]
+
+env:
+  DSS_PROJECT: DATAIKUCOEREPORTING
+
+jobs:
+  print-env:
+    name: Env list
+    runs-on: ubuntu-latest
+    steps: 
+      - name: print envs
+        run: set
